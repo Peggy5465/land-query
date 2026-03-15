@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>花蓮光復鄉災害土地查詢系統</title>
+    <title>馬太鞍受災土地查詢系統 (大平、大安段)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
@@ -22,7 +22,7 @@
 </head>
 <body>
 
-<header><h1>📍 災害土地查詢系統 (光復鄉)</h1></header>
+<header><h1>📍 馬太鞍受災土地查詢系統 (大平、大安段)</h1></header>
 
 <div class="container">
     <div id="sidebar">
@@ -83,8 +83,8 @@
                 <b>⚠️ 查獲受災紀錄</b><hr>
                 <b>段號：</b>${target14}<br>
                 <b>位置：</b>${match["位置"] || "見清冊"}<br>
-                <b>使用分區：</b>${match["使用分區"] || "無資料"}<br>
-                <b>使用類別：</b>${match["使用類別"] || "無資料"}<br>
+                <b>使用分區：</b>${match["使用分區"] || "位於都市計畫區"}<br>
+                <b>使用類別：</b>${match["使用類別"] || "位於都市計畫區"}<br>
                 
             `;
         } else {
