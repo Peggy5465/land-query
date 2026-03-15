@@ -80,11 +80,12 @@
                     <b>⚠️ 查獲受災土地</b><br>
                     <b>段號：</b>${target14}<br>
                     <b>位置：</b>${match.位置 || '見清冊'}<br>
-                    <b>管理者：</b>${match.管理者 || '無資料'}
+					<b>使用分區：</b>${match.使用分區 || '無資料'}<br>
+					<b>使用類別：</b>${match.使用類別 || '無資料'}<br>
                 </div>`;
             showHighlight(target14);
         } else {
-            content.innerHTML = `<div style="color:#27ae60; border:1px solid #27ae60; padding:10px; border-radius:5px;">✅ 安全 (不在清冊中)</div>`;
+            content.innerHTML = `<div style="color:#27ae60; border:1px solid #27ae60; padding:10px; border-radius:5px;">✅ 不在清冊中</div>`;
             if(highlightLayer) map.removeLayer(highlightLayer);
         }
     }
