@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>災害土地查詢系統 (修正版)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .container { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 320px; padding: 20px; border-right: 1px solid #ccc; background: white; z-index: 1000; overflow-y: auto; }
+        #map { flex: 1; height: 100%; }
+        .input-group { margin-bottom: 15px; }
+        select, input { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #e67e22; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #status-light { padding: 5px; font-size: 12px; margin-bottom: 10px; border-radius: 4px; background: #eee; }
+        #infoContent { margin-top: 20px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="sidebar">
+        <h3>🔍 土地查詢</h3>
+        <div id="status-light">⏳ 正在初始化系統...</div>
+        
+        <div class="input-group">
+            <label>1. 選擇地段：</label>
+            <select id="sectionSelect"><option value="">-- 等待資料載入 --</option></select>
+        </div>
+        
+        <div class="input-group">
+            <label>2. 輸入地號 (正號-副號)：</label>
+            <div style="display:flex; gap:5px; align-items: center;">
+                <input type="text" id="numMain" placeholder="4碼" maxlength="4">
+                <span>-</span>
+                <input type="text" id="numSub" placeholder="4碼" maxlength="4" value="0">
+            </div>
+        </div>
+        
+        <button id="searchBtn">開始查詢</button>
+        <div id="infoContent"></div>
+    </div>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // 定義全局變數
+    var map;
+    var disasterData = [];
+    var geojsonLayer;
+    var highlightLayer;
+
+    // --- [核心：查詢函式] ---
+    function performSearch() {
+        const sectCode = document.getElementById('sectionSelect').value;
+        const main = document.getElementById('numMain').value.trim();
+        const sub = document.getElementById('numSub').value.trim() || "0";
+        
+        if (!sectCode || !main) {
+            alert("請選擇地段並輸入地號");
+            return;
+        }
+
+        // 組合 14 碼 (代碼 6 碼 + 正號 4 碼 + 副號 4 碼)
+        const target14 = sectCode + main.padStart(4, '0') + sub.padStart(4, '0');
+        console.log("正在查詢段號:", target14);
+
+        // 在清冊中比對 (處理 NUMBER 補零)
+        const match = disasterData.find(d => {
+            const numStr = d.NUMBER ? d.NUMBER.toString().padStart(8, '0') : "";
+            const current14 = d.sect_code + numStr;
+            return current14 === target14;
+        });
+
+        const content = document.getElementById('infoContent');
+        if (match) {
+            content.innerHTML = `
+                <div style="color:#c0392b; border:2px solid #e74c3c; padding:10px; border-radius:5px; background:#fff5f5;">
+                    <b>⚠️ 查獲受災土地</b><br>
+                    <b>段號：</b>${target14}<br>
+                    <b>位置：</b>${match.位置 || '見清冊'}<br>
+                    <b>管理者：</b>${match.管理者 || '無資料'}
+                </div>`;
+            showHighlight(target14);
+        } else {
+            content.innerHTML = `<div style="color:#27ae60; border:1px solid #27ae60; padding:10px; border-radius:5px;">✅ 安全 (不在清冊中)</div>`;
+            if(highlightLayer) map.removeLayer(highlightLayer);
+        }
+    }
+
+    // --- [地圖高亮] ---
+    function showHighlight(target14) {
+        if(highlightLayer) map.removeLayer(highlightLayer);
+        if(!geojsonLayer) return;
+
+        let found = false;
+        geojsonLayer.eachLayer(layer => {
+            const p = layer.feature.properties;
+            const mapNum8 = p.NUMBER ? p.NUMBER.toString().padStart(8, '0') : "";
+            const map14 = (p.sect_code || "") + mapNum8;
+
+            if (map14 === target14) {
+                highlightLayer = L.geoJSON(layer.feature, {
+                    style: { color: 'red', weight: 5, fillOpacity: 0.7 }
+                }).addTo(map);
+                map.fitBounds(highlightLayer.getBounds(), { padding: [50, 50] });
+                found = true;
+            }
+        });
+        if (!found) console.warn("地圖圖資中找不到對應地塊");
+    }
+
+    // --- [啟動初始化] ---
+    window.onload = async function() {
+        const status = document.getElementById('status-light');
+        const searchBtn = document.getElementById('searchBtn');
+
+        // 綁定按鈕事件 (避免使用 HTML 上的 onclick)
+        searchBtn.addEventListener('click', performSearch);
+
+        // 1. 初始化地圖
+        try {
+            map = L.map('map').setView([23.673, 121.423], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            status.innerHTML = "⌛ 地圖已就緒，讀取資料中...";
+        } catch (e) {
+            status.innerHTML = "❌ 地圖加載失敗";
+        }
+
+        // 2. 讀取清冊
+        try {
+            const res = await fetch('list.json');
+            if (!res.ok) throw new Error("找不到 list.json");
+            disasterData = await res.json();
+            
+            const select = document.getElementById('sectionSelect');
+            select.innerHTML = '<option value="">-- 請選擇地段 --</option>';
+            
+            const sections = {};
+            disasterData.forEach(item => {
+                if(item.SECTION && item.sect_code) sections[item.SECTION] = item.sect_code;
+            });
+
+            Object.keys(sections).sort().forEach(name => {
+                let opt = document.createElement('option');
+                opt.value = sections[name];
+                opt.innerHTML = name;
+                select.appendChild(opt);
+            });
+
+            status.innerHTML = "✅ 系統就緒 (已載入 " + disasterData.length + " 筆)";
+            status.style.color = "green";
+        } catch (err) {
+            status.innerHTML = "❌ 資料載入失敗: " + err.message;
+            console.error(err);
+        }
+
+        // 3. 讀取地籍圖層
+        fetch('map.json')
+            .then(res => res.json())
+            .then(data => {
+                geojsonLayer = L.geoJSON(data, {
+                    style: { color: "#333", weight: 0.5, fillOpacity: 0.05 }
+                }).addTo(map);
+            }).catch(e => console.log("背景圖層載入跳過"));
+    };
+</script>
+</body>
+</html>
