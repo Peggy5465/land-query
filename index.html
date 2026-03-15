@@ -92,24 +92,56 @@
 
     // --- [地圖高亮] ---
     function showHighlight(target14) {
-        if(highlightLayer) map.removeLayer(highlightLayer);
-        if(!geojsonLayer) return;
+    if(highlightLayer) map.removeLayer(highlightLayer);
+    if(!geojsonLayer) return;
 
-        let found = false;
-        geojsonLayer.eachLayer(layer => {
-            const p = layer.feature.properties;
-            const mapNum8 = p.NUMBER ? p.NUMBER.toString().padStart(8, '0') : "";
-            const map14 = (p.sect_code || "") + mapNum8;
+    let found = false;
+    console.log("開始比對圖資，目標 14 碼:", target14);
 
-            if (map14 === target14) {
-                highlightLayer = L.geoJSON(layer.feature, {
-                    style: { color: 'red', weight: 5, fillOpacity: 0.7 }
-                }).addTo(map);
-                map.fitBounds(highlightLayer.getBounds(), { padding: [50, 50] });
-                found = true;
-            }
-        });
-        if (!found) console.warn("地圖圖資中找不到對應地塊");
+    geojsonLayer.eachLayer(layer => {
+        const p = layer.feature.properties;
+        
+        // 1. 處理 sect_code (確保不為空)
+        const sCode = p.sect_code || "";
+        
+        // 2. 處理 NUMBER (這是關鍵！)
+        // 將 1750000 這種數字轉為字串，並確保它是 8 碼 (前面補0)
+        let nStr = p.NUMBER ? p.NUMBER.toString() : "";
+        const mapNum8 = nStr.padStart(8, '0'); 
+        
+        // 3. 組合地圖上的 14 碼
+        const map14 = sCode + mapNum8;
+
+        if (map14 === target14) {
+            console.log("✅ 成功比對到地塊！屬性內容:", p);
+            
+            highlightLayer = L.geoJSON(layer.feature, {
+                style: { 
+                    color: '#ff0000', 
+                    weight: 5, 
+                    fillOpacity: 0.6,
+                    dashArray: '5, 10' // 虛線效果增加辨識度
+                }
+            }).addTo(map);
+            
+            // 自動縮放至該地塊
+            const bounds = highlightLayer.getBounds();
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
+            
+            highlightLayer.bindPopup(`
+                <b>查獲受災土地</b><br>
+                段號：${target14}<br>
+                地號：${p.地號 || p.NUMBER}<br>
+                面積：${p.Maparea || '無資料'} 平方公尺
+            `).openPopup();
+            
+            found = true;
+        }
+    });
+
+    if (!found) {
+        console.warn("❌ 圖資比對失敗。請檢查 Console 印出的 map14 是否與 target14 一致。");
+    }
     }
 
     // --- [啟動初始化] ---
