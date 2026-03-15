@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>花蓮光復鄉災害土地查詢系統</title>
+    <title>花蓮光復鄉馬太鞍溪堰塞湖土地查詢系統</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
@@ -85,11 +85,11 @@
         infoBox.style.display = 'block';
         if (match) {
             infoBox.className = "info-box danger";
-            infoBox.innerHTML = `<b>⚠️ 查獲受災紀錄</b><br>段號：${target14}<br>位置：${match.位置 || '見清冊'}<br>管理者：${match.管理者 || '無資料'}`;
+            infoBox.innerHTML = `<b>⚠️ 屬於受災清冊</b><br>段號：${target14}<br>位置：${match.位置 || '見清冊'}<br>使用分區：${match.使用分區 || '無資料'<br>使用類別：${match.使用類別 || '無資料'}`;
             showOnMap(target14);
         } else {
             infoBox.className = "info-box safe";
-            infoBox.innerHTML = `<b>✅ 正常土地</b><br>段號：${target14}<br>該地號不在目前受災清冊內。`;
+            infoBox.innerHTML = `<b>✅ 該地號不在目前受災清冊內</b><br>段號：${target14}<br>`;
             if (highlightLayer) map.removeLayer(highlightLayer);
         }
     }
