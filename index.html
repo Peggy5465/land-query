@@ -92,55 +92,61 @@
 
     // --- [地圖高亮] ---
     function showHighlight(target14) {
+    // 1. 清除舊的高亮圖層
     if(highlightLayer) map.removeLayer(highlightLayer);
-    if(!geojsonLayer) return;
+    if(!geojsonLayer) {
+        console.error("圖資尚未載入");
+        return;
+    }
 
-    let found = false;
-    console.log("開始比對圖資，目標 14 碼:", target14);
+    let foundFeature = null;
 
+    // 2. 遍歷圖層尋找匹配的地塊
     geojsonLayer.eachLayer(layer => {
         const p = layer.feature.properties;
         
-        // 1. 處理 sect_code (確保不為空)
-        const sCode = p.sect_code || "";
-        
-        // 2. 處理 NUMBER (這是關鍵！)
-        // 將 1750000 這種數字轉為字串，並確保它是 8 碼 (前面補0)
-        let nStr = p.NUMBER ? p.NUMBER.toString() : "";
-        const mapNum8 = nStr.padStart(8, '0'); 
-        
-        // 3. 組合地圖上的 14 碼
-        const map14 = sCode + mapNum8;
+        // 優先使用圖資內的「段號」欄位進行比對
+        // 確保大小寫與 map.geojson 一致（您的檔案中是大寫的 "段號"）
+        const mapID14 = p.段號 || (p.sect_code + p.NUMBER.toString().padStart(8, '0'));
 
-        if (map14 === target14) {
-            console.log("✅ 成功比對到地塊！屬性內容:", p);
-            
-            highlightLayer = L.geoJSON(layer.feature, {
-                style: { 
-                    color: '#ff0000', 
-                    weight: 5, 
-                    fillOpacity: 0.6,
-                    dashArray: '5, 10' // 虛線效果增加辨識度
-                }
-            }).addTo(map);
-            
-            // 自動縮放至該地塊
-            const bounds = highlightLayer.getBounds();
-            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
-            
-            highlightLayer.bindPopup(`
-                <b>查獲受災土地</b><br>
-                段號：${target14}<br>
-                地號：${p.地號 || p.NUMBER}<br>
-                面積：${p.Maparea || '無資料'} 平方公尺
-            `).openPopup();
-            
-            found = true;
+        if (mapID14 === target14) {
+            foundFeature = layer;
         }
     });
 
-    if (!found) {
-        console.warn("❌ 圖資比對失敗。請檢查 Console 印出的 map14 是否與 target14 一致。");
+    // 3. 如果找到了，執行高亮與跳轉
+    if (foundFeature) {
+        console.log("✅ 成功找到地塊，準備跳轉");
+        
+        highlightLayer = L.geoJSON(foundFeature.feature, {
+            style: { 
+                color: '#FF0000', 
+                weight: 6, 
+                fillOpacity: 0.5,
+                fillColor: '#FF0000'
+            }
+        }).addTo(map);
+
+        // 強制地圖移動到該地塊
+        const bounds = highlightLayer.getBounds();
+        map.flyToBounds(bounds, { 
+            padding: [50, 50], 
+            maxZoom: 18, 
+            duration: 1.5 // 動畫持續 1.5 秒
+        });
+
+        // 彈出視窗
+        highlightLayer.bindPopup(`
+            <div style="font-size:14px;">
+                <b style="color:red;">受災土地定位</b><br>
+                <b>段號：</b>${target14}<br>
+                <b>面積：</b>${foundFeature.feature.properties.Maparea || '無資料'} ㎡
+            </div>
+        `).openPopup();
+
+    } else {
+        console.warn("❌ 圖資比對失敗，目標 14 碼為:", target14);
+        alert("查有清冊資料，但地圖圖資中找不到對應的地號邊界。\n請確認該地號是否存在於 map.geojson 中。");
     }
     }
 
