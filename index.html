@@ -38,8 +38,8 @@
         }
         /* 圖例裡的格線圖示模擬 */
         .river-legend-icon {
-            border: 2px solid #FF0000;
-            background-image: repeating-linear-gradient(45deg, #FF0000 0, #FF0000 1px, transparent 0, transparent 4px);
+            border: 2px solid #008AEC;
+            background-color: rgba(107, 185, 236, 0.4);
         }
 		
     </style>
@@ -112,6 +112,7 @@
                 <b>使用類別：</b>${match["使用類別"] || "位於都市計畫區"}<br>
 				<b>土地權屬：</b>${match["所有人"] }<br>
 				<b>公有土地管理機關：</b>${match["公有土地管理機關"] || "無"}<br>
+				<b>位於河川治理用地範圍內：</b>${match["位於河川治理用地範圍內"] || "無"}<br>
 				
             `;
         } else {
@@ -198,7 +199,7 @@
                         weight: 5,        // **粗度 5**
                         opacity: 1,       // 外框不透明
                         fillColor: "#6BB9EC", // 內部填充藍色
-                        fillOpacity: 0.15  // **淡紅色半透明 (替代格線)**
+                        fillOpacity: 0.15  // **淡藍色半透明 (替代格線)**
                     }
                 }).addTo(map);
             
@@ -214,9 +215,15 @@
         legend.onAdd = function () {
             const div = L.DomUtil.create('div', 'legend');
             div.innerHTML = `
-                <b style="font-size:14px;">地圖圖例</b><br>
-                <i class="river-legend-icon"></i> 河川治理用地範圍<br>
-                
+                <b style="font-size:14px; color:#2c3e50;">地圖圖例</b><hr style="margin:5px 0;">
+                <div style="display:flex; align-items:center; margin-bottom:5px;">
+                    <i class="river-legend-icon"></i> 
+                    <span>河川治理用地範圍</span>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <i style="background: rgba(255, 0, 0, 0.6); border: 2px solid red;"></i> 
+                    <span>受災土地 (查詢結果)</span>
+                </div>
             `;
             return div;
         };
