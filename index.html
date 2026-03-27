@@ -18,6 +18,30 @@
         .info-box { margin-top: 20px; padding: 15px; border-radius: 5px; display: none; line-height: 1.8; font-size: 14px; }
         .danger { background: #fff5f5; border: 1px solid #e74c3c; color: #c0392b; }
         .safe { background: #f4fff4; border: 1px solid #27ae60; color: #27ae60; }
+		/* --- [新增：圖例樣式] --- */
+        .legend {
+            background: white;
+            padding: 12px;
+            line-height: 22px;
+            color: #333;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            font-size: 13px;
+        }
+        .legend i {
+            width: 20px;
+            height: 20px;
+            float: left;
+            margin-right: 10px;
+            opacity: 0.8;
+            border-radius: 2px;
+        }
+        /* 圖例裡的格線圖示模擬 */
+        .river-legend-icon {
+            border: 2px solid #FF0000;
+            background-image: repeating-linear-gradient(45deg, #FF0000 0, #FF0000 1px, transparent 0, transparent 4px);
+        }
+		
     </style>
 </head>
 <body>
@@ -164,7 +188,7 @@
                 status.innerHTML += " | ❌ 地圖失敗";
             });
 			
-		// C. 【新增】載入河川治理範圍 (river_boundary.geojson)
+		// C. 載入河川治理範圍 (river_boundary.geojson)
         fetch('river_boundary.geojson')
             .then(res => res.json())
             .then(data => {
@@ -185,6 +209,18 @@
             .catch(err => {
                 console.warn("未找到河川範圍圖資 (river_boundary.geojson)");
             });
+		// 4. 添加圖例
+        const legend = L.control({position: 'bottomright'});
+        legend.onAdd = function () {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <b style="font-size:14px;">地圖圖例</b><br>
+                <i class="river-legend-icon"></i> 河川治理用地範圍<br>
+                
+            `;
+            return div;
+        };
+        legend.addTo(map);
     }
 
     window.onload = setup;
