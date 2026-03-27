@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>馬太鞍受災土地查詢系統 (大平、大安段)</title>
+    <title>花蓮馬太鞍溪堰塞湖重災區造林範圍地籍位置查詢</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
@@ -22,7 +22,7 @@
 </head>
 <body>
 
-<header><h1>📍 馬太鞍受災土地查詢系統 (大平、大安段)</h1></header>
+<header><h1>花蓮馬太鞍溪堰塞湖重災區造林範圍地籍位置查詢</h1></header>
 
 <div class="container">
     <div id="sidebar">
@@ -55,7 +55,8 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var disasterData = [];
-    var geojsonLayer;
+	var geojsonLayer; // 地籍圖層
+    var riverLayer;   // 河川圖層 (新增)
     var highlightLayer;
 
     // --- 2. 查詢比對功能 ---
@@ -144,6 +145,7 @@
                 select.appendChild(opt);
             });
             status.innerHTML = "✅ 清冊載入成功 (共 " + disasterData.length + " 筆)";
+			status.innerHTML = "農田水利署截至115.3.25前提供資料";
             status.style.color = "green";
         } catch (e) {
             console.error(e);
@@ -160,6 +162,28 @@
                 }).addTo(map);
             }).catch(err => {
                 status.innerHTML += " | ❌ 地圖失敗";
+            });
+			
+		// C. 【新增】載入河川治理範圍 (river_boundary.geojson)
+        fetch('river_boundary.geojson')
+            .then(res => res.json())
+            .then(data => {
+                riverLayer = L.geoJSON(data, {
+                    style: { 
+                        color: "#008AEC", // **藍色粗外框**
+                        weight: 5,        // **粗度 5**
+                        opacity: 1,       // 外框不透明
+                        fillColor: "#6BB9EC", // 內部填充藍色
+                        fillOpacity: 0.15  // **淡紅色半透明 (替代格線)**
+                    }
+                }).addTo(map);
+            
+                // 將河川圖層推到最底層，避免遮擋高亮地塊
+                riverLayer.bringToBack();
+                console.log("河川範圍載入成功");
+            })
+            .catch(err => {
+                console.warn("未找到河川範圍圖資 (river_boundary.geojson)");
             });
     }
 
