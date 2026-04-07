@@ -41,6 +41,22 @@
             border: 2px solid #008AEC;
             background-color: rgba(107, 185, 236, 0.4);
         }
+		/* 醒目提示區塊樣式 */
+		.warning-box {
+   		     background-color: #fff3cd;
+  		     border: 1px solid #ffeeba;
+  		     color: #856404;
+  		     padding: 12px;
+ 		     border-radius: 4px;
+ 		     margin-bottom: 20px;
+  		     font-size: 13px;
+  		     line-height: 1.5;
+  		     border-left: 5px solid #ffc107; /* 側邊粗線增加視覺強度 */
+		}
+		.warning-box b {
+ 		     color: #d35400;
+  		     display: block;
+   		     margin-bottom: 5px;}
 		
     </style>
 </head>
@@ -52,6 +68,9 @@
     <div id="sidebar">
         <div id="status-light">正在初始化系統...</div>
         
+		<div class="warning-box">
+        <b>本平台現為測試版本，是否符合補助造林資格應以本署實際公告範圍為準</b>
+		
         <div class="input-group">
             <label>1. 選擇地段：</label>
             <select id="sectionSelect"><option value="">-- 等待資料載入 --</option></select>
@@ -113,6 +132,7 @@
 				<b>土地權屬：</b>${match["所有人"] }<br>
 				<b>公有土地管理機關：</b>${match["公有土地管理機關"] || "無"}<br>
 				<b>位於河川治理用地範圍內：</b>${match["位於河川治理用地範圍內"] || "無"}<br>
+				<b>是否符合補助造林資格：</b>${match["是否符合補助造林資格"]}<br>
 				
             `;
         } else {
@@ -169,8 +189,8 @@
                 opt.innerText = name;
                 select.appendChild(opt);
             });
-            status.innerHTML = "✅ 清冊載入成功 (共 " + disasterData.length + " 筆)農田水利署截至115.3.25前提供資料";
-			// status.innerHTML = "農田水利署截至115.3.25前提供資料";
+            status.innerHTML = "✅ 清冊載入成功 (共 " + disasterData.length + " 筆)";
+			status.innerHTML = "農田水利署截至115.3.25前提供資料";
             status.style.color = "green";
         } catch (e) {
             console.error(e);
