@@ -41,36 +41,21 @@
             border: 2px solid #008AEC;
             background-color: rgba(107, 185, 236, 0.4);
         }
-		/* 醒目提示區塊樣式 */
-		.warning-box {
-   		     background-color: #fff3cd;
-  		     border: 1px solid #ffeeba;
-  		     color: #856404;
-  		     padding: 12px;
- 		     border-radius: 4px;
- 		     margin-bottom: 20px;
-  		     font-size: 13px;
-  		     line-height: 1.5;
-  		     border-left: 5px solid #ffc107; /* 側邊粗線增加視覺強度 */
-		}
-		.warning-box b {
- 		     color: #d35400;
-  		     display: block;
-   		     margin-bottom: 5px;}
 		
     </style>
 </head>
 <body>
 
-<header><h1>花蓮馬太鞍溪堰塞湖重災區造林範圍地籍位置查詢</h1></header>
-
+<header>
+    <h1>花蓮馬太鞍溪堰塞湖重災區造林範圍地籍位置查詢</h1>
+    <div style="font-size: 14px; margin-top: 5px; color: #ecf0f1; opacity: 0.9;">
+        本平台現為測試版本，是否符合補助造林資格應以本署實際公告範圍為準。
+    </div>
+</header>
 <div class="container">
     <div id="sidebar">
         <div id="status-light">正在初始化系統...</div>
         
-		<div class="warning-box">
-        <b>本平台現為測試版本，是否符合補助造林資格應以本署實際公告範圍為準</b>
-		
         <div class="input-group">
             <label>1. 選擇地段：</label>
             <select id="sectionSelect"><option value="">-- 等待資料載入 --</option></select>
