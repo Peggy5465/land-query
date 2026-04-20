@@ -41,6 +41,20 @@
             border: 6px solid #008AEC;
             background-color: rgba(107, 185, 236, 0.4);
         }
+		/* 側邊欄聯絡資訊區塊 */
+		.sidebar-contact {
+ 		   margin-top: 30px;
+ 		   padding: 15px;
+  		  border-top: 2px solid #eee;
+ 		   font-size: 13px;
+  		  color: #555;
+  		  line-height: 1.6;
+		}
+		.sidebar-contact b {
+  		  display: block;
+  		  color: #2c3e50;
+   		 margin-bottom: 5px;
+		}
 		
     </style>
 </head>
@@ -49,7 +63,7 @@
 <header>
     <h1>花蓮馬太鞍溪堰塞湖重災區造林範圍地籍位置查詢</h1>
     <div style="font-size: 20px; margin-top: 5px; color: #ecf0f1; opacity: 0.9;">
-        本平台現為測試版本，是否符合補助造林資格應以本署實際公告範圍為準
+        本平台僅供基本資料查詢，是否符合造林補助資格應以本部實際公告範圍為準
     </div>
 </header>
 <div class="container">
@@ -72,6 +86,14 @@
         
         <button id="searchBtn">立即查詢</button>
         <div id="infoBox" class="info-box"></div>
+		<div class="sidebar-contact">
+        <b>行政院光復工作站聯絡電話</b>
+        03-8700305
+        03-8700309
+        03-8700318
+        03-8700319
+        03-8700296
+    </div>
     </div>
     <div id="map"></div>
 </div>
@@ -175,7 +197,7 @@
                 select.appendChild(opt);
             });
             status.innerHTML = "✅ 清冊載入成功 (共 " + disasterData.length + " 筆)";
-			status.innerHTML = "清冊來源：農田水利署截至115.3.25前提供資料";
+			status.innerHTML = "清冊來源：農田水利署截至114.12.31前提供資料";
             status.style.color = "green";
         } catch (e) {
             console.error(e);
